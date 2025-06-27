@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Scanner de Presença</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <h2>Escaneie seu QR Code</h2>
+  <div id="reader" style="width:300px;"></div>
+  <p>Nome lido: <span id="nome"></span></p>
+  <button id="confirmar" disabled>Confirmar Presença</button>
+
+  <script>
+    let nomeLido = "";
+
+    function enviarParaPlanilha(nome) {
+      const dataHora = new Date().toLocaleString();
+      const url = "https://script.google.com/macros/s/AKfycbyxnFD4y8dEciIi0qCJ8G5xYnKyMODE3Smq92xV24H7f9kZHQy9Kt3ftm2NxXM3AgpH0Q/exec";
+      fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(dataHora)}`)
+        .then(response => alert("Presença confirmada!"))
+        .catch(err => alert("Erro ao enviar presença"));
+    }
+
+    const scanner = new Html5Qrcode("reader");
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      qrCodeMessage => {
+        scanner.stop();
+        nomeLido = qrCodeMessage;
+        document.getElementById("nome").innerText = nomeLido;
+        document.getElementById("confirmar").disabled = false;
+      }
+    );
+
+    document.getElementById("confirmar").onclick = () => {
+      enviarParaPlanilha(nomeLido);
+    };
+  </script>
+</body>
+</html>
