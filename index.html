@@ -5,39 +5,79 @@
   <meta charset="UTF-8">
   <title>Scanner de Presença</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+
   <h2>Escaneie seu QR Code</h2>
-  <div id="reader" style="width:300px;"></div>
-  <p>Nome lido: <span id="nome"></span></p>
+
+  <div id="reader"></div>
+
+  <p><strong>Nome lido:</strong> <span id="nome"></span></p>
+
   <button id="confirmar" disabled>Confirmar Presença</button>
 
   <script>
     let nomeLido = "";
+    let scanner;
+
+    function iniciarScanner() {
+      scanner = new Html5Qrcode("reader");
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          scanner.start(
+            devices[0].id,
+            { fps: 10, qrbox: 250 },
+            qrCodeMessage => {
+              scanner.stop().then(() => {
+                nomeLido = qrCodeMessage;
+                document.getElementById("nome").innerText = nomeLido;
+                document.getElementById("confirmar").disabled = false;
+              });
+            }
+          );
+        }
+      }).catch(err => {
+        alert("Erro ao acessar câmera");
+      });
+    }
 
     function enviarParaPlanilha(nome) {
       const dataHora = new Date().toLocaleString();
       const url = "https://script.google.com/macros/s/AKfycbyVbCWTUFFMNXM6XCsToe07Zb9jHh_IdECaJYoTG4oNX2KrvxyJ0k_tliq_0beR4bldLg/exec";
+
       fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(dataHora)}`)
-        .then(response => alert("Presença confirmada!"))
+        .then(response => {
+          alert("Presença confirmada!");
+          document.getElementById("confirmar").disabled = true;
+          document.getElementById("nome").innerText = "";
+          iniciarScanner();
+        })
         .catch(err => alert("Erro ao enviar presença"));
     }
-
-    const scanner = new Html5Qrcode("reader");
-    scanner.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      qrCodeMessage => {
-        scanner.stop();
-        nomeLido = qrCodeMessage;
-        document.getElementById("nome").innerText = nomeLido;
-        document.getElementById("confirmar").disabled = false;
-      }
-    );
 
     document.getElementById("confirmar").onclick = () => {
       enviarParaPlanilha(nomeLido);
     };
+
+    iniciarScanner();
   </script>
+
 </body>
 </html>
