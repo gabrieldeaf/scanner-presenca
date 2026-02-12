@@ -5,28 +5,12 @@
   <meta charset="UTF-8">
   <title>Scanner de Presença</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #reader {
-      width: 300px;
-      margin: auto;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-  </style>
 </head>
 <body>
 
   <h2>Escaneie seu QR Code</h2>
 
-  <div id="reader"></div>
+  <div id="reader" style="width:300px;"></div>
 
   <p><strong>Nome lido:</strong> <span id="nome"></span></p>
 
@@ -59,10 +43,13 @@
     }
 
     function enviarParaPlanilha(nome) {
-      const dataHora = new Date().toLocaleString();
+      const agora = new Date();
+      const data = agora.toLocaleDateString();
+      const hora = agora.toLocaleTimeString();
+
       const url = "https://script.google.com/macros/s/AKfycbyVbCWTUFFMNXM6XCsToe07Zb9jHh_IdECaJYoTG4oNX2KrvxyJ0k_tliq_0beR4bldLg/exec";
 
-      fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(dataHora)}`)
+      fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}&hora=${encodeURIComponent(hora)}`)
         .then(response => {
           alert("Presença confirmada!");
           document.getElementById("confirmar").disabled = true;
