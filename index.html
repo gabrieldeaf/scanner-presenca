@@ -16,7 +16,7 @@
 
     function enviarParaPlanilha(nome) {
       const dataHora = new Date().toLocaleString();
-      const url = "https://script.google.com/macros/s/AKfycbyxnFD4y8dEciIi0qCJ8G5xYnKyMODE3Smq92xV24H7f9kZHQy9Kt3ftm2NxXM3AgpH0Q/exec";
+      const url = "https://script.google.com/macros/s/AKfycbyDylBSC4DxwmbouzbmsUauegl6Y_H7h_Ad9Lsyh2jcfN4ayS7GyMQEZkBqoZN0xzU7Ug/exec";
       fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(dataHora)}`)
         .then(response => alert("Presença confirmada!"))
         .catch(err => alert("Erro ao enviar presença"));
