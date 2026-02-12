@@ -1,13 +1,10 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Scanner de Presença</title>
 
-  <!-- Fonte Moderna -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
@@ -114,17 +111,15 @@
       const data = agora.toLocaleDateString();
       const hora = agora.toLocaleTimeString();
 
-      const url = "https://script.google.com/macros/s/AKfycbyVbCWTUFFMNXM6XCsToe07Zb9jHh_IdECaJYoTG4oNX2KrvxyJ0k_tliq_0beR4bldLg/exec";
+      const url = "https://script.google.com/macros/s/AKfycbx0UAfgAwW4scMPj7RCiocA36SEtAznufKrW_l6YV_JgBi3JFU0jgYMsNp7cjHaS84t5Q/exec";
 
-      fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}&hora=${encodeURIComponent(hora)}`)
-        .then(response => response.text())
-        .then(text => {
-          alert("✅ Presença confirmada!");
-          document.getElementById("confirmar").disabled = true;
-          document.getElementById("nome").innerText = "";
-          iniciarScanner();
-        })
-        .catch(err => alert("Erro ao enviar presença"));
+      const img = new Image();
+      img.src = `${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}&hora=${encodeURIComponent(hora)}`;
+
+      alert("✅ Presença confirmada!");
+      document.getElementById("confirmar").disabled = true;
+      document.getElementById("nome").innerText = "";
+      iniciarScanner();
     }
 
     document.getElementById("confirmar").onclick = () => {
