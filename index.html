@@ -4,17 +4,84 @@
 <head>
   <meta charset="UTF-8">
   <title>Scanner de Presença</title>
+
+  <!-- Fonte Moderna -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+      border-radius: 15px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+
+    #nome {
+      font-size: 20px;
+      font-weight: 600;
+      color: #00ffcc;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 30px;
+      background: #00ffcc;
+      color: #1e3c72;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h2>Escaneie seu QR Code</h2>
+  <h2>📷 Escaneie seu QR Code</h2>
 
-  <div id="reader" style="width:300px;"></div>
+  <div id="reader"></div>
 
-  <p><strong>Nome lido:</strong> <span id="nome"></span></p>
-
-  <button id="confirmar" disabled>Confirmar Presença</button>
+  <div class="card">
+    <p><strong>Nome lido:</strong></p>
+    <p id="nome"></p>
+    <button id="confirmar" disabled>Confirmar Presença</button>
+  </div>
 
   <script>
     let nomeLido = "";
@@ -24,7 +91,7 @@
       scanner = new Html5Qrcode("reader");
 
       Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
+        if (devices.length > 0) {
           scanner.start(
             devices[0].id,
             { fps: 10, qrbox: 250 },
@@ -50,8 +117,9 @@
       const url = "https://script.google.com/macros/s/AKfycbyVbCWTUFFMNXM6XCsToe07Zb9jHh_IdECaJYoTG4oNX2KrvxyJ0k_tliq_0beR4bldLg/exec";
 
       fetch(`${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}&hora=${encodeURIComponent(hora)}`)
-        .then(response => {
-          alert("Presença confirmada!");
+        .then(response => response.text())
+        .then(text => {
+          alert("✅ Presença confirmada!");
           document.getElementById("confirmar").disabled = true;
           document.getElementById("nome").innerText = "";
           iniciarScanner();
