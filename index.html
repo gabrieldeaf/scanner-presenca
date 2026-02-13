@@ -74,18 +74,27 @@
     <p><strong>Nome lido:</strong></p>
     <p id="nome"></p>
     <button id="confirmar" disabled>Confirmar Presença</button>
+    <br>
+    <button id="trocarCamera">🔁 Trocar Câmera</button>
   </div>
 
   <script>
     let nomeLido = "";
     let scanner;
     let ultimoQr = "";
+    let cameras = [];
+    let cameraIndex = 0;
 
-    function iniciarScanner() {
+    function iniciarScanner(cameraId) {
+
+      if (scanner) {
+        scanner.stop().catch(()=>{});
+      }
+
       scanner = new Html5Qrcode("reader");
 
       scanner.start(
-        { facingMode: "environment" }, // FORÇA câmera traseira
+        cameraId,
         { fps: 10, qrbox: 250 },
         qrCodeMessage => {
 
@@ -102,9 +111,25 @@
           }
         }
       ).catch(err => {
-        alert("Erro ao acessar câmera");
+        alert("Erro ao iniciar câmera");
       });
     }
+
+    Html5Qrcode.getCameras().then(devices => {
+      cameras = devices;
+      if (cameras.length > 0) {
+        iniciarScanner(cameras[cameraIndex].id);
+      }
+    });
+
+    document.getElementById("trocarCamera").onclick = () => {
+      if (cameras.length > 1) {
+        cameraIndex = (cameraIndex + 1) % cameras.length;
+        iniciarScanner(cameras[cameraIndex].id);
+      } else {
+        alert("Só existe uma câmera disponível.");
+      }
+    };
 
     function enviarParaPlanilha(nome) {
       const agora = new Date();
@@ -124,7 +149,6 @@
       enviarParaPlanilha(nomeLido);
     };
 
-    iniciarScanner();
   </script>
 
 </body>
