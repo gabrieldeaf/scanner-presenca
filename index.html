@@ -84,28 +84,24 @@
     function iniciarScanner() {
       scanner = new Html5Qrcode("reader");
 
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices.length > 0) {
-          scanner.start(
-            devices[0].id,
-            { fps: 10, qrbox: 250 },
-            qrCodeMessage => {
+      scanner.start(
+        { facingMode: "environment" }, // FORÇA câmera traseira
+        { fps: 10, qrbox: 250 },
+        qrCodeMessage => {
 
-              if (qrCodeMessage === ultimoQr) return;
-              ultimoQr = qrCodeMessage;
+          if (qrCodeMessage === ultimoQr) return;
+          ultimoQr = qrCodeMessage;
 
-              nomeLido = qrCodeMessage;
-              document.getElementById("nome").innerText = nomeLido;
-              document.getElementById("confirmar").disabled = false;
+          nomeLido = qrCodeMessage;
+          document.getElementById("nome").innerText = nomeLido;
+          document.getElementById("confirmar").disabled = false;
 
-              // Vibração no celular (200ms)
-              if (navigator.vibrate) {
-                navigator.vibrate(200);
-              }
-            }
-          );
+          // Vibração 200ms
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
         }
-      }).catch(err => {
+      ).catch(err => {
         alert("Erro ao acessar câmera");
       });
     }
