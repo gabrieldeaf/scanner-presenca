@@ -74,53 +74,41 @@
     <p><strong>Nome lido:</strong></p>
     <p id="nome"></p>
     <button id="confirmar" disabled>Confirmar Presença</button>
-    <br>
-    <button id="trocarCamera">🔁 Trocar Câmera</button>
   </div>
 
   <script>
     let nomeLido = "";
     let scanner;
-    let cameras = [];
-    let cameraIndex = 0;
+    let ultimoQr = "";
 
-    function iniciarScanner(cameraId) {
-      if (scanner) {
-        scanner.stop().catch(()=>{});
-      }
-
+    function iniciarScanner() {
       scanner = new Html5Qrcode("reader");
 
-      scanner.start(
-        cameraId,
-        { fps: 10, qrbox: 250 },
-        qrCodeMessage => {
-          scanner.stop().then(() => {
-            nomeLido = qrCodeMessage;
-            document.getElementById("nome").innerText = nomeLido;
-            document.getElementById("confirmar").disabled = false;
-          });
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices.length > 0) {
+          scanner.start(
+            devices[0].id,
+            { fps: 10, qrbox: 250 },
+            qrCodeMessage => {
+
+              if (qrCodeMessage === ultimoQr) return;
+              ultimoQr = qrCodeMessage;
+
+              nomeLido = qrCodeMessage;
+              document.getElementById("nome").innerText = nomeLido;
+              document.getElementById("confirmar").disabled = false;
+
+              // Vibração no celular (200ms)
+              if (navigator.vibrate) {
+                navigator.vibrate(200);
+              }
+            }
+          );
         }
-      ).catch(err => {
-        alert("Erro ao iniciar câmera");
+      }).catch(err => {
+        alert("Erro ao acessar câmera");
       });
     }
-
-    Html5Qrcode.getCameras().then(devices => {
-      cameras = devices;
-      if (cameras.length > 0) {
-        iniciarScanner(cameras[cameraIndex].id);
-      }
-    });
-
-    document.getElementById("trocarCamera").onclick = () => {
-      if (cameras.length > 1) {
-        cameraIndex = (cameraIndex + 1) % cameras.length;
-        iniciarScanner(cameras[cameraIndex].id);
-      } else {
-        alert("Só existe uma câmera disponível.");
-      }
-    };
 
     function enviarParaPlanilha(nome) {
       const agora = new Date();
@@ -132,16 +120,15 @@
       const img = new Image();
       img.src = `${url}?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}&hora=${encodeURIComponent(hora)}`;
 
-      alert("✅ Presença confirmada!");
       document.getElementById("confirmar").disabled = true;
       document.getElementById("nome").innerText = "";
-      iniciarScanner(cameras[cameraIndex].id);
     }
 
     document.getElementById("confirmar").onclick = () => {
       enviarParaPlanilha(nomeLido);
     };
 
+    iniciarScanner();
   </script>
 
 </body>
