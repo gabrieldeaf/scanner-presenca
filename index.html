@@ -46,19 +46,15 @@
     }
 
     button {
-      padding: 12px 25px;
-      font-size: 16px;
+      padding: 10px 20px;
+      font-size: 15px;
       border: none;
-      border-radius: 30px;
+      border-radius: 25px;
       background: #00ffcc;
       color: #1e3c72;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
+      margin: 5px;
     }
 
     button:disabled {
@@ -78,33 +74,53 @@
     <p><strong>Nome lido:</strong></p>
     <p id="nome"></p>
     <button id="confirmar" disabled>Confirmar Presença</button>
+    <br>
+    <button id="trocarCamera">🔁 Trocar Câmera</button>
   </div>
 
   <script>
     let nomeLido = "";
     let scanner;
+    let cameras = [];
+    let cameraIndex = 0;
 
-    function iniciarScanner() {
+    function iniciarScanner(cameraId) {
+      if (scanner) {
+        scanner.stop().catch(()=>{});
+      }
+
       scanner = new Html5Qrcode("reader");
 
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices.length > 0) {
-          scanner.start(
-            devices[0].id,
-            { fps: 10, qrbox: 250 },
-            qrCodeMessage => {
-              scanner.stop().then(() => {
-                nomeLido = qrCodeMessage;
-                document.getElementById("nome").innerText = nomeLido;
-                document.getElementById("confirmar").disabled = false;
-              });
-            }
-          );
+      scanner.start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        qrCodeMessage => {
+          scanner.stop().then(() => {
+            nomeLido = qrCodeMessage;
+            document.getElementById("nome").innerText = nomeLido;
+            document.getElementById("confirmar").disabled = false;
+          });
         }
-      }).catch(err => {
-        alert("Erro ao acessar câmera");
+      ).catch(err => {
+        alert("Erro ao iniciar câmera");
       });
     }
+
+    Html5Qrcode.getCameras().then(devices => {
+      cameras = devices;
+      if (cameras.length > 0) {
+        iniciarScanner(cameras[cameraIndex].id);
+      }
+    });
+
+    document.getElementById("trocarCamera").onclick = () => {
+      if (cameras.length > 1) {
+        cameraIndex = (cameraIndex + 1) % cameras.length;
+        iniciarScanner(cameras[cameraIndex].id);
+      } else {
+        alert("Só existe uma câmera disponível.");
+      }
+    };
 
     function enviarParaPlanilha(nome) {
       const agora = new Date();
@@ -119,14 +135,13 @@
       alert("✅ Presença confirmada!");
       document.getElementById("confirmar").disabled = true;
       document.getElementById("nome").innerText = "";
-      iniciarScanner();
+      iniciarScanner(cameras[cameraIndex].id);
     }
 
     document.getElementById("confirmar").onclick = () => {
       enviarParaPlanilha(nomeLido);
     };
 
-    iniciarScanner();
   </script>
 
 </body>
